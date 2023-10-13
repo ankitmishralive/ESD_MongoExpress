@@ -1,0 +1,15 @@
+
+
+# Get 
+http://localhost:9000/mobile 
+http://localhost:9000/mobile/<id> 
+
+# POST
+http://localhost:9000/mobile/<id> 
+
+
+# PATCH 
+http://localhost:9000/mobile/<id> 
+
+# DELETE 
+http://localhost:9000/mobile/<id> 

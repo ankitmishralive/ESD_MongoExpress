@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile Inventory</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <style>
+        body {
+            background-color: #1f2937;
+            color: #e5e7eb;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background-color: #2d3748;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            background-color: #4f46e5;
+            color: #e5e7eb;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #4338ca;
+        }
+
+        .input-field {
+            border: none;
+            background-color: #374151;
+            color: #e5e7eb;
+            padding: 0.5rem;
+            border-radius: 5px;
+            width: 100%;
+        }
+
+        .input-field::placeholder {
+            color: #9ca3af;
+        }
+    </style>
+</head>
+
+
+<body class="p-4">
+
+    <div class="container">
+        <h1 class="text-2xl font-bold mb-4">ESD- MongoDB- Express Api's</h1>
+
+        <!-- Create New Laptop Form -->
+        <div class="mb-4">
+            <button class="btn" onclick="toggleCreateForm()">Add New Laptop</button>
+            <div id="createForm" style="display: none;">
+                <form onsubmit="addLaptop(event)">
+                    <input type="text" class="input-field mb-2" id="newBrand" placeholder="Brand">
+                    <input type="text" class="input-field mb-2" id="newName" placeholder="Name">
+                    <input type="number" class="input-field mb-2" id="newPrice" placeholder="Price">
+                    <input type="text" class="input-field mb-2" id="newDisplay" placeholder="Display">
+                    <input type="text" class="input-field mb-2" id="newProcessor" placeholder="Processor">
+                    <input type="text" class="input-field mb-2" id="newRAM" placeholder="RAM">
+                    <input type="text" class="input-field mb-2" id="newStorage" placeholder="Storage">
+                    <button type="submit" class="btn">Add</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- List of Laptops -->
+        <div id="laptopList">
+            <% laptops.forEach((laptop) => { %>
+                <div class="card">
+                    <h2 class="text-xl font-bold mb-2">Model Name:  <%= laptop.laptopName %></h2>
+                    <p class="text-gray-200 mb-2">Brand Name: <%= laptop.laptopBrand %></p>
+                    <p class="text-gray-200 mb-2">Price: $<%= laptop.laptopPrice %></p>
+                    <p class="text-gray-200 mb-2">Display:  <%= laptop.laptopDisplay %></p>
+                    <p class="text-gray-200 mb-2">Processor: <%= laptop.laptopProcessor %></p>
+                    <p class="text-gray-200 mb-2">RAM: <%= laptop.laptopRAM %></p>
+                    <p class="text-gray-200 mb-2">Storage: <%= laptop.laptopStorage %></p>
+                    <div class="flex justify-end mb-2">
+                        <button class="btn mr-2" onclick="editLaptop('<%= laptop._id %>')">Edit</button>
+                        <button class="btn" onclick="deleteLaptop('<%= laptop.laptopName %>')">Delete</button>
+                    </div>
+                    <div id="editForm<%= laptop._id %>" style="display: none;">
+                        <input type="text" class="input-field mb-2" id="editedBrand<%= laptop._id %>"
+                        value="<%= laptop.laptopBrand %>">
+                        <input type="text" class="input-field mb-2" id="editedName<%= laptop._id %>"
+                            value="<%= laptop.laptopName %>">
+                        <input type="text" class="input-field mb-2" id="editedPrice<%= laptop._id %>"
+                            value="<%= laptop.laptopPrice %>">
+                        <input type="text" class="input-field mb-2" id="editedDisplay<%= laptop._id %>"
+                            value="<%= laptop.laptopDisplay %>">
+                        <input type="text" class="input-field mb-2" id="editedProcessor<%= laptop._id %>"
+                            value="<%= laptop.laptopProcessor %>">
+                        <input type="text" class="input-field mb-2" id="editedRAM<%= laptop._id %>"
+                            value="<%= laptop.laptopRAM %>">
+                        <input type="text" class="input-field mb-2" id="editedStorage<%= laptop._id %>"
+                            value="<%= laptop.laptopStorage %>">
+                        <button class="btn" onclick="saveChanges('<%= laptop._id %>')">Save Changes</button>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+    </div>
+
+    <script>
+
+
+ 
+        function toggleCreateForm() {
+            const createForm = document.getElementById('createForm');
+            const createButton = document.querySelector('.bg-green-500');
+        
+            if (createForm.style.display === 'none' || createForm.style.display === '') {
+                createForm.style.display = 'block';
+                createButton.textContent = 'Cancel';
+            } else {
+                createForm.style.display = 'none';
+                createButton.textContent = 'Create New Mobile';
+            }
+
+         
+        }
+        
+        async function addLaptop(event) {
+    event.preventDefault();
+
+    const newBrand = document.getElementById('newBrand').value;
+    const newName = document.getElementById('newName').value;
+    const newPrice = document.getElementById('newPrice').value;
+    const newDisplay = document.getElementById('newDisplay').value;
+    const newProcessor = document.getElementById('newProcessor').value;
+    const newRAM = document.getElementById('newRAM').value;
+    const newStorage = document.getElementById('newStorage').value;
+
+    const response = await fetch('/laptops', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            laptopBrand: newBrand,
+            laptopName: newName,
+            laptopPrice: newPrice,
+            laptopDisplay: newDisplay,
+            laptopProcessor: newProcessor,
+            laptopRAM: newRAM,
+            laptopStorage: newStorage
+        })
+    });
+    window.location.reload();
+    swal("Added New Laptop", "Added !", "success");
+}
+
+function editLaptop(id) {
+    const editForm = document.getElementById(`editForm${id}`);
+    editForm.style.display = 'block';
+
+}
+
+        
+async function saveChanges(id) {
+    try {
+        const editedBrand = document.getElementById(`editedBrand${id}`).value;
+        const editedName = document.getElementById(`editedName${id}`).value;
+        const editedPrice = document.getElementById(`editedPrice${id}`).value;
+        const editedDisplay = document.getElementById(`editedDisplay${id}`).value;
+        const editedProcessor = document.getElementById(`editedProcessor${id}`).value;
+        const editedRAM = document.getElementById(`editedRAM${id}`).value;
+        const editedStorage = document.getElementById(`editedStorage${id}`).value;
+
+        const response = await fetch(`/laptops/${id}`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                laptopBrand: editedBrand,
+                laptopName: editedName,
+                laptopPrice: editedPrice,
+                laptopDisplay: editedDisplay,
+                laptopProcessor: editedProcessor,
+                laptopRAM: editedRAM,
+                laptopStorage: editedStorage
+            })
+        });
+
+        window.location.reload();
+        swal("Updated !", "Updated Your Data", "info");
+
+        // Rest of the code remains the same
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+        
+        
+async function deleteLaptop(name) {
+    try {
+        const response = await fetch(`/laptops/delete-by-name/${name}`, {
+            method: 'DELETE',
+        });
+
+        window.location.reload();
+        swal("Deleted", "Deleted Your Data", "success");
+
+        // Rest of the code remains the same
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+        
+        
+       
+        
+            </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
+</body>
+
+</html>
